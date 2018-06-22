@@ -21,3 +21,5 @@ updateInst inst currPos = concat [fstPart,offset,sndPart]
         elemOfCurrInd = inst !! currPos
 
 result = jump input 0 0
+
+--- NIE DZIALA ---
