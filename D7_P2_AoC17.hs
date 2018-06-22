@@ -7,8 +7,6 @@ input = lines raw
 n = length input
 start = "hmvwl"
 depth = 5
---depth = 5
-basis = search start
 
 search :: String -> [String]
 search program = map (takeWhile (/=',')) $ head [drop 3 (words $ input !! x) | x <- [0,1..(n-1)], head (words $ input !! x) == program]
@@ -19,16 +17,16 @@ val name = head [(read :: String -> Int) (tail $ init ((words $ input !! x) !! 1
 calculate :: String -> Int
 calculate name = if search name == [] then val name else (sum $ map (calculate) (search name)) + val name
 
---test = map calculate (search start)
-
-data Fajnytyp a = Int | FajntypInt Int | Fajnytyp [Fajnytyp a] deriving (Show)
-
-checkWhatWrong :: Int -> String -> Fajnytyp a
-checkWhatWrong lastdifference name =
-  let grouped = group $ sort $ map calculate (search name)
-      difference = (head $ grouped !! 1) - (head $ grouped !! 0)
-      wrongValue = head $ head $ filter (\x -> (length x) == 1) grouped
-      wrongName = [(search name) !! x | x <- [0,1..((length $ search name)) - 1], val ((search name) !! x) == wrongValue]
-  in if length grouped == 1 then FajntypInt ((val name) - lastdifference) else Fajnytyp (map (checkWhatWrong difference) (search name))
+data Fajnytyp a = Int | FajntypInt Int | Fajnytyp (Fajnytyp a) deriving (Show)
 
 result = checkWhatWrong 0 start
+
+checkWhatWrong :: Int -> String -> Int
+checkWhatWrong lastdifference name
+  | (length grouped) == 1 = (val name) - lastdifference
+  | otherwise = let
+                  difference = (head $ grouped !! 1) - (head $ grouped !! 0)
+                  wrongValue = head $ head $ filter (\x -> (length x) == 1) grouped
+                  wrongName = [(search name) !! x | x <- [0,1..((length $ search name) - 1)], calculate ((search name) !! x) == wrongValue] !! 0
+                in checkWhatWrong difference wrongName
+  where grouped = group $ sort $ map calculate (search name)
